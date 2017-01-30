@@ -10,7 +10,13 @@ from tsfresh.feature_extraction import MinimalFeatureExtractionSettings
 import tsfresh as ts
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import precision_recall_fscore_support as score
+#from sklearn.metrics import precision_recall_fscore_support as score
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import log_loss
+from sklearn.metrics import f1_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import AdaBoostClassifier
@@ -29,6 +35,13 @@ y=[]
 
 #dictionnaire de metrics pour chaque algo de train (variable perso)
 algo_metrics={}
+	
+algo_metrics['precision']=[]
+algo_metrics['recall']=[]
+algo_metrics['fscore']=[]
+algo_metrics['support']=[]
+algo_metrics['log_loss']=[]
+algo_metrics['confusion_matrix']=[]
 
 ##############################Déclaration de fonctions de preprocessing des données################
 
@@ -96,75 +109,185 @@ def get_features(master_df):
 	
 #split les features temps en set de train et teste pour l'apprentissage(quest 6)
 def split_train_test(feature,y,test=0.25):
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test, random_state=0)
+	X_train, X_test, y_train, y_test = train_test_split(feature, y, test_size=test, random_state=0)
 	return X_train, X_test, y_train, y_test
 
 ##############################Déclaration de fonctions des algorithme de train#####################
 #A demandé au moins 3 algo mais i guess ça fait pas de mal d'en faire genre 5...
 
 #fonction de l'algorithme d'apprentissage KNN(quest 7)
-def Knn_algorithm(X_train,y_train,X_test):
+def Knn_algorithm(X_train,y_train,X_test,y_test):
 	clf = KNeighborsClassifier(n_neighbors=len(class_names))
 	clf.fit(X_train, y_train)	
 	y_predict = clf.predict(X_test)
-	return clf, y_predict
+	clf_probs = clf.predict_proba(X_test)
+	
+	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
+	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
+	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
+	algo_metrics['support'].append(classification_report(y_test, y_predict))
+	algo_metrics['log_loss'].append(log_loss(y_test, clf_probs))
+	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
+
+
+	
 
 #fonction de l'algorithme d'apprentissage DecisionTree(quest 7)
-def DecisionTree_algorithm(X_train,y_train,X_test):
+def DecisionTree_algorithm(X_train,y_train,X_test,y_test):
 	clf = DecisionTreeClassifier()
 	clf.fit(X_train,y_train)
 	y_predict=clf.predict(X_test)
-	return clf, y_predict
+	clf_probs = clf.predict_proba(X_test)
+	
+	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
+	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
+	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
+	algo_metrics['support'].append(classification_report(y_test, y_predict))
+	algo_metrics['log_loss'].append(log_loss(y_test, clf_probs))
+	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
+
+	
+	
 	
 #fonction de l'algorithme d'apprentissage RandomForest(quest 7)
-def RandomForest_algorithm(X_train,y_train,X_test):
+def RandomForest_algorithm(X_train,y_train,X_test,y_test):
 	clf = RandomForestClassifier()
 	clf.fit(X_train,y_train)
 	y_predict=clf.predict(X_test)
-	return clf,y_predict
+	clf_probs = clf.predict_proba(X_test)
+	#precision, recall, fscore, support = score(y_test, y_predict)
+	
+	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
+	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
+	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
+	algo_metrics['support'].append(classification_report(y_test, y_predict))
+	algo_metrics['log_loss'].append(log_loss(y_test, clf_probs))
+	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
+
+	
 
 
 #fonction de l'algorithme d'apprentissage AdaBoostClassifier(quest 7)
-def AdaBoost_algorithm(X_train,y_train,X_test):
+def AdaBoost_algorithm(X_train,y_train,X_test,y_test):
 	clf= AdaBoostClassifier()
 	clf.fit(X_train,y_train)
 	y_predict=clf.predict(X_test)
-	return clf,y_predict
+	clf_probs = clf.predict_proba(X_test)
+	
+	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
+	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
+	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
+	algo_metrics['support'].append(classification_report(y_test, y_predict))
+	algo_metrics['log_loss'].append(log_loss(y_test, clf_probs))
+	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
+
+	
 	
 #fonction de l'algorithme d'apprentissage GradientBoostingClassifier(quest 7)
-def GradientBoosting_algorithm(X_train,y_train,X_test):
+def GradientBoosting_algorithm(X_train,y_train,X_test,y_test):
 	clf= GradientBoostingClassifier()
 	clf.fit(X_train,y_train)
 	y_predict=clf.predict(X_test)
-	return cld, y_predict
+	clf_probs = clf.predict_proba(X_test)
+
+	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
+	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
+	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
+	algo_metrics['support'].append(classification_report(y_test, y_predict))
+	algo_metrics['log_loss'].append(log_loss(y_test,clf_probs))
+	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
+
+	
+##############################Declaration de fonction du déroulement du script#####################
+
+def data_and_algorithm_exe():
+	id=0
+	y=[]
+	##recup les données dans un dataframe pandas
+	df=csv_to_dataframe(path)
+	
+	#Transforme les données en un format acceptable par tsfresh
+	master_df,id,y=preparation(df,id,y,100)
+
+	#Extrait les features des données master_df
+	X=pd.DataFrame()
+	X=get_features(master_df)
+
+	#Diviser les données en train et test sets (20% test)
+	X_train, X_test, y_train, y_test=split_train_test(X,y,0.2)
+
+	#tester tous les algos sur nos données
+	Knn_algorithm(X_train,y_train,X_test,y_test)
+	DecisionTree_algorithm(X_train,y_train,X_test,y_test)
+	RandomForest_algorithm(X_train,y_train,X_test,y_test)
+	AdaBoost_algorithm(X_train,y_train,X_test,y_test)
+	GradientBoosting_algorithm(X_train,y_train,X_test,y_test)
+	
+def comparaison(metric):
+	algorithm = ['KNNeighbors', 'DecisionTree', 'RandomForest', 'AdaBoost', 'GradientBoostring']
+	data = algo_metrics[metric]
+	if(metric!="support" and metric!="confusion_matrix"):
+		pos = np.arange(len(algorithm))
+		width = 1.0     # gives histogram aspect to the bar diagram
+
+		ax = plt.axes()
+		ax.set_xticks(pos + (width / 2))
+		ax.set_xticklabels(algorithm,rotation=10, rotation_mode="anchor", ha="right")
+		plt.suptitle(metric, fontsize=14)
+		plt.bar(pos,data,width)
+		plt.show()
+
+def script():
+	choice=0
+	metrics_names =['precision','recall','fscore','support','log_loss','confusion_matrix']
+	while choice==0:
+		print("\n")
+		print("*****************FODAP PROJECT*****************")
+		print("***********************************************")
+		print("1-Show plot of classes.")
+		print("2-Load data and execute training algorithms.")
+		print("3-exit.")
+		print("***********************************************")
+		
+		#Demander le choix à l'utilisateur
+		print("Choose what to execute first")
+		while choice not in [1,2,3]:
+			choice=int(input())
+
+		os.system('clear')
+		if(choice==3):
+			print("Bye!")
+		elif(choice==1):
+			print("***** Classes Plot ******")
+			#affiche les graphe 2D de chaque class sur le fichier 1.csv
+			class_plot()
+			print("press 0 to return")
+			print("press whatever number to quite")
+			choice=int(input())
+		elif(choice==2):
+			#charge les données, retreive les features et train sur les 5 algos
+			data_and_algorithm_exe()
+			while choice != 7:
+				os.system('clear')
+				print("Traning done !")
+				print("**************")
+				print("Metrics comparing plots:")
+				print("1- Precision.")
+				print("2- Recall")
+				print("3- Fscore")
+				print("4- Support")
+				print("5- Log_loss")
+				print("6- Confusion matrix")
+				print("-")
+				print("press 0 to return")
+				print("press 7 to quite")
+				choice=int(input())
+				if(choice!=0 and choice!=7):
+					comparaison(metrics_names[choice-1])
 	
 ###################################################################################################
 #kinda testing random code
 
-##recup les données dans un dataframe pandas
-df=csv_to_dataframe(path)
+script()
 
-##affiche les graphe 2D de chaque class sur le fichier 1.csv
-#class_plot()
-
-##Transforme les données en un format acceptable par tsfresh
-master_df,id,y=preparation(df,id,y,100)
-
-##Extrait les features des données master_df
-X=get_features(master_df)
-
-##Diviser les données en train et test sets
-X_train, X_test, y_train, y_test=split_train_test(X,y,0.2)
-
-##tester KNN sur nos données
-clf,y_predict = Knn_algorithm(X_train,y_train,X_test)
-
-##tester les mesure de accuracy etc pour KNN
-precision, recall, fscore, support = score(y_test, y_predict)
-
-print('precision: {}'.format(precision))
-print('recall: {}'.format(recall))
-print('fscore: {}'.format(fscore))
-print('support: {}'.format(support))
-
-############################# Si on a le temps...maybe interface  ###############################
+###################################################################################################

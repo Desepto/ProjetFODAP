@@ -10,12 +10,11 @@ from tsfresh.feature_extraction import MinimalFeatureExtractionSettings
 import tsfresh as ts
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-#from sklearn.metrics import precision_recall_fscore_support as score
+from sklearn.metrics import precision_recall_fscore_support as score
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import log_loss
 from sklearn.metrics import f1_score
-from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -35,7 +34,6 @@ y=[]
 
 #dictionnaire de metrics pour chaque algo de train (variable perso)
 algo_metrics={}
-	
 algo_metrics['precision']=[]
 algo_metrics['recall']=[]
 algo_metrics['fscore']=[]
@@ -59,8 +57,6 @@ def csv_to_dataframe(path):
 	frame=frame.drop(labels="step",axis=1)
 	frame=frame[frame.Class != 0]
 	return frame
-
-
 
 #fonction qui plot un graph pour chaque class sur le fichier 1.csv(quest 3)
 def class_plot():
@@ -88,9 +84,9 @@ def splitDataFrameIntoSmaller(df, chunkSize):
 def preparation(df,id,y,length=100):
 	rdf=pd.DataFrame()
 	classes= class_names
-	#classes_nb= [ i for i in range(1,8)] #sert à rien
+	print("preprocessing...")
 	for cls in classes:
-		print(cls)
+		print("===> C"+str(classes.index(cls)+1)+": "+cls)
 		df_class=df[df.Class==classes.index(cls)+1]
 		df_i=splitDataFrameIntoSmaller(df_class,length)
 		for df_ in df_i:
@@ -99,7 +95,6 @@ def preparation(df,id,y,length=100):
 			df_.insert(3,'id',id)
 			id+=1
 			rdf=rdf.append(df_)
-		print("fin")
 	return rdf,id,y
 
 #fonction qui generate les features à partir du dataframe temp master_df(quest 5)	
@@ -122,16 +117,8 @@ def Knn_algorithm(X_train,y_train,X_test,y_test):
 	y_predict = clf.predict(X_test)
 	clf_probs = clf.predict_proba(X_test)
 	
-	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
-	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
-	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
-	algo_metrics['support'].append(classification_report(y_test, y_predict))
-	algo_metrics['log_loss'].append(log_loss(y_test, clf_probs))
-	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
-
-
+	get_metrics(y_test,y_predict,clf_probs)
 	
-
 #fonction de l'algorithme d'apprentissage DecisionTree(quest 7)
 def DecisionTree_algorithm(X_train,y_train,X_test,y_test):
 	clf = DecisionTreeClassifier()
@@ -139,15 +126,7 @@ def DecisionTree_algorithm(X_train,y_train,X_test,y_test):
 	y_predict=clf.predict(X_test)
 	clf_probs = clf.predict_proba(X_test)
 	
-	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
-	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
-	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
-	algo_metrics['support'].append(classification_report(y_test, y_predict))
-	algo_metrics['log_loss'].append(log_loss(y_test, clf_probs))
-	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
-
-	
-	
+	get_metrics(y_test,y_predict,clf_probs)
 	
 #fonction de l'algorithme d'apprentissage RandomForest(quest 7)
 def RandomForest_algorithm(X_train,y_train,X_test,y_test):
@@ -155,17 +134,8 @@ def RandomForest_algorithm(X_train,y_train,X_test,y_test):
 	clf.fit(X_train,y_train)
 	y_predict=clf.predict(X_test)
 	clf_probs = clf.predict_proba(X_test)
-	#precision, recall, fscore, support = score(y_test, y_predict)
 	
-	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
-	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
-	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
-	algo_metrics['support'].append(classification_report(y_test, y_predict))
-	algo_metrics['log_loss'].append(log_loss(y_test, clf_probs))
-	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
-
-	
-
+	get_metrics(y_test,y_predict,clf_probs)
 
 #fonction de l'algorithme d'apprentissage AdaBoostClassifier(quest 7)
 def AdaBoost_algorithm(X_train,y_train,X_test,y_test):
@@ -174,15 +144,8 @@ def AdaBoost_algorithm(X_train,y_train,X_test,y_test):
 	y_predict=clf.predict(X_test)
 	clf_probs = clf.predict_proba(X_test)
 	
-	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
-	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
-	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
-	algo_metrics['support'].append(classification_report(y_test, y_predict))
-	algo_metrics['log_loss'].append(log_loss(y_test, clf_probs))
-	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
+	get_metrics(y_test,y_predict,clf_probs)
 
-	
-	
 #fonction de l'algorithme d'apprentissage GradientBoostingClassifier(quest 7)
 def GradientBoosting_algorithm(X_train,y_train,X_test,y_test):
 	clf= GradientBoostingClassifier()
@@ -190,16 +153,19 @@ def GradientBoosting_algorithm(X_train,y_train,X_test,y_test):
 	y_predict=clf.predict(X_test)
 	clf_probs = clf.predict_proba(X_test)
 
+	get_metrics(y_test,y_predict,clf_probs)
+
+##############################Declaration de fonction du déroulement du script#####################
+
+def get_metrics(y_test,y_predict,clf_probs):
+	a,b,c,support =score(y_test, y_predict)
 	algo_metrics['precision'].append(accuracy_score(y_test, y_predict))
 	algo_metrics['recall'].append(recall_score(y_test, y_predict,average='macro'))
 	algo_metrics['fscore'].append(f1_score(y_test, y_predict,average='macro'))
-	algo_metrics['support'].append(classification_report(y_test, y_predict))
+	algo_metrics['support'].append(support)
 	algo_metrics['log_loss'].append(log_loss(y_test,clf_probs))
 	algo_metrics['confusion_matrix'].append(confusion_matrix(y_test,y_predict))
-
 	
-##############################Declaration de fonction du déroulement du script#####################
-
 def data_and_algorithm_exe():
 	id=0
 	y=[]
@@ -210,12 +176,15 @@ def data_and_algorithm_exe():
 	master_df,id,y=preparation(df,id,y,100)
 
 	#Extrait les features des données master_df
+	os.system('clear')
 	X=pd.DataFrame()
 	X=get_features(master_df)
 
 	#Diviser les données en train et test sets (20% test)
 	X_train, X_test, y_train, y_test=split_train_test(X,y,0.2)
 
+	os.system('clear')
+	print("Training...")
 	#tester tous les algos sur nos données
 	Knn_algorithm(X_train,y_train,X_test,y_test)
 	DecisionTree_algorithm(X_train,y_train,X_test,y_test)
@@ -226,7 +195,7 @@ def data_and_algorithm_exe():
 def comparaison(metric):
 	algorithm = ['KNNeighbors', 'DecisionTree', 'RandomForest', 'AdaBoost', 'GradientBoostring']
 	data = algo_metrics[metric]
-	if(metric!="support" and metric!="confusion_matrix"):
+	if(metric!="confusion_matrix" and metric!="support"):
 		pos = np.arange(len(algorithm))
 		width = 1.0     # gives histogram aspect to the bar diagram
 
@@ -236,12 +205,17 @@ def comparaison(metric):
 		plt.suptitle(metric, fontsize=14)
 		plt.bar(pos,data,width)
 		plt.show()
+	else:
+		for algo in algorithm:
+			print(algo)
+			print(data[algorithm.index(algo)])
+			print("********")
 
 def script():
 	choice=0
 	metrics_names =['precision','recall','fscore','support','log_loss','confusion_matrix']
 	while choice==0:
-		print("\n")
+		os.system('clear')
 		print("*****************FODAP PROJECT*****************")
 		print("***********************************************")
 		print("1-Show plot of classes.")
@@ -253,7 +227,7 @@ def script():
 		print("Choose what to execute first")
 		while choice not in [1,2,3]:
 			choice=int(input())
-
+		
 		os.system('clear')
 		if(choice==3):
 			print("Bye!")
@@ -267,7 +241,7 @@ def script():
 		elif(choice==2):
 			#charge les données, retreive les features et train sur les 5 algos
 			data_and_algorithm_exe()
-			while choice != 7:
+			while choice != 7 and choice != 0:
 				os.system('clear')
 				print("Traning done !")
 				print("**************")
@@ -283,7 +257,15 @@ def script():
 				print("press 7 to quite")
 				choice=int(input())
 				if(choice!=0 and choice!=7):
+					os.system('clear')
 					comparaison(metrics_names[choice-1])
+					if(choice==6):
+						print("-")
+						print("press 0 to return")
+						print("press 8 to choose another metric")
+						print("press 7 to quite")
+						choice=int(input())
+						
 	
 ###################################################################################################
 #kinda testing random code

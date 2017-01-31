@@ -259,7 +259,7 @@ def script():
 				if(choice!=0 and choice!=7):
 					os.system('clear')
 					comparaison(metrics_names[choice-1])
-					if(choice==6):
+					if(choice==6 or choice==4):
 						print("-")
 						print("press 0 to return")
 						print("press 8 to choose another metric")

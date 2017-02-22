@@ -72,7 +72,7 @@ def class_plot():
 		plt.legend(['x', 'y', 'z'], loc='upper left')
 		plt.show()
 
-#fonction qui divide les df_class en partie de tailles length because np.array_split fait n'importe quoi
+#fonction qui divide les df_class en partie de tailles length because np.array_split fait n'importe quoi chez moi
 def splitDataFrameIntoSmaller(df, chunkSize): 
 	listOfDf = list()
 	numberChunks = len(df) // chunkSize + 1
@@ -80,17 +80,6 @@ def splitDataFrameIntoSmaller(df, chunkSize):
 		listOfDf.append(df[i*chunkSize:(i+1)*chunkSize])
 	return listOfDf
 
-#même fonction mais c'est celle d'Eya 
-def splitDataFrame(df, length): 
-	list_df = list()
-	rest = len(df)%length
-	if rest==0:
-		numberOfParts = len(df) // length 
-	else:
-		numberOfParts = len(df) // length+1
-		for i in range(numberOfParts):
-			list_df.append(df[i*length:(i+1)*length])
-	return list_df
     
 #fonction qui prepare les données sous un format supporté par tsfresh(quest 4)
 def preparation(df,id,y,length=100):
@@ -100,7 +89,7 @@ def preparation(df,id,y,length=100):
 	for cls in classes:
 		print("===> C"+str(classes.index(cls)+1)+": "+cls)
 		df_class=df[df.Class==classes.index(cls)+1]
-		df_i=splitDataFrame(df_class,length) #splitDataFrameIntoSmaller(df_class,length) #fct d'Eya because ça à l'air plus logique quand même
+		df_i=splitDataFrameIntoSmaller(df_class,length) 
 		for df_ in df_i:
 			y.append(cls)
 			df_=df_.drop(labels="Class",axis=1)
